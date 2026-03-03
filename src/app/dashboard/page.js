@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRouter } from 'next/navigation';
+import { getAllTemplates } from '@/config/prompts';
 import Image from 'next/image';
 import { 
   Upload, Mic, LogOut, Loader2, User, Search, Plus, 
@@ -46,6 +47,8 @@ export default function Dashboard() {
   const [showTemplateSelector, setShowTemplateSelector] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [showTasksPanel, setShowTasksPanel] = useState(false);
+  const [templates, setTemplates] = useState([]);
+  const [selectedTemplateName, setSelectedTemplateName] = useState('SOAP Note');
 
   useEffect(() => {
     if (!loading && !user) {
@@ -58,6 +61,11 @@ export default function Dashboard() {
       fetchPatients();
     }
   }, [user]);
+
+  useEffect(() => {
+    // Load templates from config file
+    setTemplates(getAllTemplates());
+  }, []);
 
   useEffect(() => {
     if (selectedPatient) {
@@ -119,7 +127,7 @@ export default function Dashboard() {
     setShowLiveModal(true);
   };
 
-  const processAudio = async (audioBlob) => {
+  const processAudio = async (audioBlob, templateId = null) => {
     setIsProcessing(true);
     try {
       // Step 1: Transcribe audio
@@ -150,17 +158,22 @@ export default function Dashboard() {
       }
       setDialogue(dialogueData.dialogue);
 
-      // Step 3: Generate medical note
+      // Step 3: Generate medical note with template
       const noteRes = await fetch('/api/generate-note', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ dialogue: dialogueData.dialogue }),
+        body: JSON.stringify({ 
+          dialogue: dialogueData.dialogue,
+          templateId: templateId
+        }),
       });
 
       const noteData = await noteRes.json();
       if (!noteRes.ok) {
         throw new Error(noteData.error || 'Note generation failed');
       }
+      console.log('Note generation response:', noteData);
+      console.log('Setting generatedNote to:', noteData.data);
       setGeneratedNote(noteData.data);
 
       // Step 4: Save to database (only if patient is selected)
@@ -213,13 +226,20 @@ export default function Dashboard() {
     setShowTemplateSelector(true);
   };
 
-  const handleTemplateSelect = async (template) => {
-    setSelectedTemplate(template);
+  const handleTemplateSelect = async (templateId) => {
+    setSelectedTemplate(templateId);
+    
+    // Find and set template name for display
+    const template = templates.find(t => t.id === templateId);
+    if (template) {
+      setSelectedTemplateName(template.title);
+    }
+    
     setShowTemplateSelector(false);
     
-    // Process the audio file
+    // Process the audio file with selected template
     if (uploadFile) {
-      await processAudio(uploadFile);
+      await processAudio(uploadFile, templateId);
       setUploadFile(null);
       setUploadProgress(0);
       
@@ -1266,89 +1286,41 @@ export default function Dashboard() {
           <div className="bg-white rounded-2xl w-full max-w-2xl shadow-xl">
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
-              <div className="flex-1">
-                <input
-                  type="text"
-                  placeholder="soap"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  defaultValue="soap"
-                />
-              </div>
+              <h2 className="text-xl font-semibold text-gray-900">Select Note Template</h2>
               <button
                 onClick={() => setShowTemplateSelector(false)}
-                className="ml-4 p-1 hover:bg-gray-100 rounded-lg transition-colors"
+                className="p-1 hover:bg-gray-100 rounded-lg transition-colors"
               >
                 <X className="h-5 w-5 text-gray-600" />
               </button>
             </div>
 
-            {/* Filters */}
-            <div className="px-6 py-3 border-b border-gray-200 flex items-center gap-4 text-sm">
-              <button className="flex items-center gap-2 text-gray-600 hover:text-gray-900">
-                <ChevronDown className="h-4 w-4" />
-                <span>Sort</span>
-              </button>
-              <button className="flex items-center gap-2 text-gray-600 hover:text-gray-900">
-                <FileText className="h-4 w-4" />
-                <span>Type</span>
-              </button>
-              <button className="flex items-center gap-2 text-gray-600 hover:text-gray-900">
-                <User className="h-4 w-4" />
-                <span>Creator</span>
-              </button>
-              <div className="ml-auto flex items-center gap-2">
-                <span className="text-gray-600">Hide Pro</span>
-                <button className="w-10 h-5 bg-gray-200 rounded-full relative">
-                  <div className="w-4 h-4 bg-white rounded-full absolute top-0.5 left-0.5"></div>
-                </button>
-              </div>
-            </div>
-
             {/* Content */}
-            <div className="p-6 max-h-96 overflow-y-auto">
-              <div className="mb-6">
-                <h3 className="text-sm font-medium text-gray-500 mb-3">Generate a note with AI</h3>
-                <button className="w-full flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                  <div className="w-8 h-8 bg-purple-100 rounded flex items-center justify-center">
-                    <Sparkles className="h-5 w-5 text-purple-600" />
-                  </div>
-                  <span className="font-medium text-gray-900">soap</span>
-                  <Sparkles className="h-4 w-4 text-purple-600 ml-auto" />
-                </button>
-              </div>
-
-              <div>
-                <h3 className="text-sm font-medium text-gray-500 mb-3">Note templates</h3>
-                <div className="space-y-2">
-                  <button className="w-full flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                    <FileText className="h-5 w-5 text-gray-600" />
-                    <span className="font-medium text-gray-900">Eating Disorder Intake & Assessment</span>
-                  </button>
-                  
-                  <button className="w-full flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                    <FileText className="h-5 w-5 text-gray-600" />
-                    <span className="font-medium text-gray-900">Physiotherapist's Note</span>
-                  </button>
-                  
-                  <button className="w-full flex items-center gap-3 p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                    <FileText className="h-5 w-5 text-gray-600" />
-                    <span className="font-medium text-gray-900">SMART goals</span>
-                  </button>
-                  
+            <div className="p-6 max-h-[500px] overflow-y-auto">
+              <div className="space-y-2">
+                {templates.map((template) => (
                   <button
-                    onClick={() => handleTemplateSelect('soap')}
-                    className="w-full flex items-center gap-3 p-4 border-2 border-blue-500 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
+                    key={template.id}
+                    onClick={() => handleTemplateSelect(template.id)}
+                    className={`w-full flex items-center gap-3 p-4 border rounded-lg hover:border-blue-400 hover:bg-blue-50 transition-all text-left ${
+                      template.isDefault ? 'border-blue-500 bg-blue-50' : 'border-gray-200'
+                    }`}
                   >
-                    <FileText className="h-5 w-5 text-blue-600" />
-                    <span className="font-medium text-gray-900">SOAP Note</span>
+                    <FileText className="h-5 w-5 text-blue-600 flex-shrink-0" />
+                    <div className="flex-1">
+                      <span className="font-medium text-gray-900">{template.title}</span>
+                      {template.isDefault && (
+                        <span className="ml-2 px-2 py-0.5 bg-blue-100 text-blue-600 text-xs rounded-full">
+                          Default
+                        </span>
+                      )}
+                    </div>
+                    <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
+                      {template.category}
+                    </span>
                   </button>
-                </div>
+                ))}
               </div>
-
-              <button className="w-full mt-6 flex items-center gap-2 p-3 text-gray-600 hover:text-gray-900 transition-colors">
-                <Plus className="h-5 w-5" />
-                <span className="font-medium">Create new template</span>
-              </button>
             </div>
           </div>
         </div>
@@ -1359,7 +1331,7 @@ export default function Dashboard() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
           <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 text-center">
             <Loader2 className="h-16 w-16 animate-spin text-blue-600 mx-auto mb-4" />
-            <h2 className="text-2xl font-bold text-gray-900 mb-2">Generating SOAP Note</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Generating {selectedTemplateName}</h2>
             <p className="text-gray-600">
               Please wait while we process the transcription and generate your medical note...
             </p>

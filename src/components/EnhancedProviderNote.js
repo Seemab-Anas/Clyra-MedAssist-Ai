@@ -21,6 +21,16 @@ export default function EnhancedProviderNote({
   const [showTranscriptionSidebar, setShowTranscriptionSidebar] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editedData, setEditedData] = useState(recordData || {});
+  const [editedContent, setEditedContent] = useState(recordData?.content || '');
+
+  // Sync editedContent when recordData changes
+  useEffect(() => {
+    console.log('EnhancedProviderNote received recordData:', recordData);
+    if (recordData) {
+      setEditedData(recordData);
+      setEditedContent(recordData.content || '');
+    }
+  }, [recordData]);
 
   const formatDate = (date) => {
     return new Date(date).toLocaleDateString('en-US', {
@@ -47,12 +57,15 @@ export default function EnhancedProviderNote({
 
   const handleSave = () => {
     setIsEditMode(false);
+    // Update the content in editedData
+    setEditedData(prev => ({ ...prev, content: editedContent }));
     // Here you would typically save to backend
-    console.log('Saving edited data:', editedData);
+    console.log('Saving edited data:', { ...editedData, content: editedContent });
   };
 
   const handleCancel = () => {
     setEditedData(recordData);
+    setEditedContent(recordData?.content || '');
     setIsEditMode(false);
   };
 
@@ -138,7 +151,7 @@ export default function EnhancedProviderNote({
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
         <div className="bg-white rounded-2xl p-8 max-w-md w-full mx-4 text-center">
           <Loader2 className="h-16 w-16 animate-spin text-blue-600 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Generating SOAP Note</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Generating Note</h2>
           <p className="text-gray-600">
             Please wait while we process the transcription and generate your medical note...
           </p>
@@ -162,7 +175,7 @@ export default function EnhancedProviderNote({
                   className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center gap-2"
                 >
                   <Edit2 className="h-4 w-4" />
-                  Edit SOAP Note
+                  Edit Note
                 </button>
               ) : (
                 <>
@@ -188,112 +201,20 @@ export default function EnhancedProviderNote({
           {/* Note Format Tabs */}
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
 
-            {/* SOAP Note Content */}
+            {/* Generic Note Content */}
             {activeNoteTab === 'soap' && (
-              <div className="p-8 space-y-8">
-                {/* Subjective Section */}
-                {(editedData.subjective || isEditMode) && (
-                  <section>
-                    <h2 className="text-2xl font-bold text-gray-900 mb-6 pb-2 border-b-2 border-blue-600">
-                      Subjective
-                    </h2>
-                    {isEditMode ? (
-                      <textarea
-                        value={editedData.subjective || ''}
-                        onChange={(e) => setEditedData(prev => ({ ...prev, subjective: e.target.value }))}
-                        className="w-full px-4 py-3 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 min-h-[200px] font-mono text-sm"
-                        placeholder="- Enter bullet points here&#10;- One per line"
-                      />
-                    ) : (
-                      <div className="bg-gray-50 rounded-lg p-4 whitespace-pre-wrap text-gray-700 leading-relaxed">
-                        {editedData.subjective}
-                      </div>
-                    )}
-                  </section>
-                )}
-
-                {/* Past Medical History Section */}
-                {(editedData.pastMedicalHistory || isEditMode) && (
-                  <section>
-                    <h2 className="text-2xl font-bold text-gray-900 mb-6 pb-2 border-b-2 border-blue-600">
-                      Past Medical History
-                    </h2>
-                    {isEditMode ? (
-                      <textarea
-                        value={editedData.pastMedicalHistory || ''}
-                        onChange={(e) => setEditedData(prev => ({ ...prev, pastMedicalHistory: e.target.value }))}
-                        className="w-full px-4 py-3 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 min-h-[150px] font-mono text-sm"
-                        placeholder="- Enter bullet points here&#10;- One per line"
-                      />
-                    ) : (
-                      <div className="bg-gray-50 rounded-lg p-4 whitespace-pre-wrap text-gray-700 leading-relaxed">
-                        {editedData.pastMedicalHistory}
-                      </div>
-                    )}
-                  </section>
-                )}
-
-                {/* Objective Section */}
-                {(editedData.objective || isEditMode) && (
-                  <section>
-                    <h2 className="text-2xl font-bold text-gray-900 mb-6 pb-2 border-b-2 border-blue-600">
-                      Objective
-                    </h2>
-                    {isEditMode ? (
-                      <textarea
-                        value={editedData.objective || ''}
-                        onChange={(e) => setEditedData(prev => ({ ...prev, objective: e.target.value }))}
-                        className="w-full px-4 py-3 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 min-h-[200px] font-mono text-sm"
-                        placeholder="- Enter bullet points here&#10;- One per line"
-                      />
-                    ) : (
-                      <div className="bg-gray-50 rounded-lg p-4 whitespace-pre-wrap text-gray-700 leading-relaxed">
-                        {editedData.objective}
-                      </div>
-                    )}
-                  </section>
-                )}
-
-                {/* Assessment Section */}
-                {(editedData.assessment || isEditMode) && (
-                  <section>
-                    <h2 className="text-2xl font-bold text-gray-900 mb-6 pb-2 border-b-2 border-blue-600">
-                      Assessment
-                    </h2>
-                    {isEditMode ? (
-                      <textarea
-                        value={editedData.assessment || ''}
-                        onChange={(e) => setEditedData(prev => ({ ...prev, assessment: e.target.value }))}
-                        className="w-full px-4 py-3 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 min-h-[100px] font-mono text-sm"
-                        placeholder="- Enter bullet points here&#10;- One per line"
-                      />
-                    ) : (
-                      <div className="bg-gray-50 rounded-lg p-4 whitespace-pre-wrap text-gray-700 leading-relaxed">
-                        {editedData.assessment}
-                      </div>
-                    )}
-                  </section>
-                )}
-
-                {/* Plan Section */}
-                {(editedData.plan || isEditMode) && (
-                  <section>
-                    <h2 className="text-2xl font-bold text-gray-900 mb-6 pb-2 border-b-2 border-blue-600">
-                      Plan
-                    </h2>
-                    {isEditMode ? (
-                      <textarea
-                        value={editedData.plan || ''}
-                        onChange={(e) => setEditedData(prev => ({ ...prev, plan: e.target.value }))}
-                        className="w-full px-4 py-3 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 min-h-[150px] font-mono text-sm"
-                        placeholder="- Enter bullet points here&#10;- One per line"
-                      />
-                    ) : (
-                      <div className="bg-gray-50 rounded-lg p-4 whitespace-pre-wrap text-gray-700 leading-relaxed">
-                        {editedData.plan}
-                      </div>
-                    )}
-                  </section>
+              <div className="p-8">
+                {isEditMode ? (
+                  <textarea
+                    value={editedContent}
+                    onChange={(e) => setEditedContent(e.target.value)}
+                    className="w-full px-4 py-3 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900 min-h-[600px] font-mono text-sm"
+                    placeholder="Enter note content here..."
+                  />
+                ) : (
+                  <div className="bg-gray-50 rounded-lg p-6 whitespace-pre-wrap text-gray-700 leading-relaxed font-sans">
+                    {editedData.content || 'No content available'}
+                  </div>
                 )}
               </div>
             )}
