@@ -2,6 +2,7 @@
   "name": "my-app",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -9,6 +10,8 @@
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
+    "csv-parser": "^3.2.0",
+    "dotenv": "^17.3.1",
     "groq-sdk": "^0.7.0",
     "jose": "^6.1.2",
     "jsonwebtoken": "^9.0.2",

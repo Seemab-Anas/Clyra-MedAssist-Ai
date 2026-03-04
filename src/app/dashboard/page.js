@@ -237,7 +237,38 @@ export default function Dashboard() {
     
     setShowTemplateSelector(false);
     
-    // Process the audio file with selected template
+    // If we have existing dialogue (from previous generation), regenerate note directly
+    if (dialogue && dialogue.length > 0) {
+      setIsProcessing(true);
+      try {
+        // Generate note with new template using existing dialogue
+        const noteRes = await fetch('/api/generate-note', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            dialogue: dialogue,
+            templateId: templateId
+          }),
+        });
+
+        const noteData = await noteRes.json();
+        if (!noteRes.ok) {
+          throw new Error(noteData.error || 'Note generation failed');
+        }
+        
+        setGeneratedNote(noteData.data);
+        setSessionTab('note');
+        setShowTasksPanel(true);
+      } catch (error) {
+        console.error('Note regeneration error:', error);
+        alert('Failed to generate note: ' + error.message);
+      } finally {
+        setIsProcessing(false);
+      }
+      return;
+    }
+    
+    // Otherwise, process the audio file with selected template
     if (uploadFile) {
       await processAudio(uploadFile, templateId);
       setUploadFile(null);
@@ -636,7 +667,10 @@ export default function Dashboard() {
               {/* Template and Actions Bar */}
               <div className="border-b border-gray-200 px-6 py-3 flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <button className="flex items-center gap-2 px-3 py-1.5 border border-gray-300 rounded-md hover:bg-gray-50 text-sm text-gray-700">
+                  <button 
+                    onClick={() => setShowTemplateSelector(true)}
+                    className="flex items-center gap-2 px-3 py-1.5 border border-gray-300 rounded-md hover:bg-gray-50 text-sm text-gray-700"
+                  >
                     <Grid className="h-4 w-4" />
                     <span>Select a template</span>
                   </button>
@@ -770,6 +804,7 @@ export default function Dashboard() {
                         dialogue={dialogue}
                         isGenerating={false}
                         onBack={() => setGeneratedNote(null)}
+                        templateId={selectedTemplate}
                       />
                     </div>
                   )}
@@ -1081,6 +1116,7 @@ export default function Dashboard() {
                     dialogue={dialogue}
                     isGenerating={false}
                     onBack={() => setGeneratedNote(null)}
+                    templateId={selectedTemplate}
                   />
                 </div>
               )}

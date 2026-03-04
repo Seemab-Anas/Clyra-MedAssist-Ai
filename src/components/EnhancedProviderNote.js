@@ -6,6 +6,8 @@ import {
   MessageSquare, Loader2, FileText, Activity, Clipboard 
 } from 'lucide-react';
 import Image from 'next/image';
+import ICDCodeSelector from './ICDCodeSelector';
+import { getTemplateById } from '@/config/prompts';
 
 export default function EnhancedProviderNote({ 
   patient, 
@@ -15,13 +17,17 @@ export default function EnhancedProviderNote({
   transcription, 
   segments = [],
   dialogue,
-  isGenerating = false 
+  isGenerating = false,
+  templateId 
 }) {
   const [activeNoteTab, setActiveNoteTab] = useState('soap');
   const [showTranscriptionSidebar, setShowTranscriptionSidebar] = useState(false);
   const [isEditMode, setIsEditMode] = useState(false);
   const [editedData, setEditedData] = useState(recordData || {});
   const [editedContent, setEditedContent] = useState(recordData?.content || '');
+  const [icdCodes, setIcdCodes] = useState(recordData?.icdCodes || []);
+  
+  const template = templateId ? getTemplateById(templateId) : null;
 
   // Sync editedContent when recordData changes
   useEffect(() => {
@@ -29,6 +35,7 @@ export default function EnhancedProviderNote({
     if (recordData) {
       setEditedData(recordData);
       setEditedContent(recordData.content || '');
+      setIcdCodes(recordData.icdCodes || []);
     }
   }, [recordData]);
 
@@ -57,16 +64,54 @@ export default function EnhancedProviderNote({
 
   const handleSave = () => {
     setIsEditMode(false);
-    // Update the content in editedData
-    setEditedData(prev => ({ ...prev, content: editedContent }));
+    // Update the content and ICD codes in editedData
+    setEditedData(prev => ({ ...prev, content: editedContent, icdCodes }));
     // Here you would typically save to backend
-    console.log('Saving edited data:', { ...editedData, content: editedContent });
+    console.log('Saving edited data:', { ...editedData, content: editedContent, icdCodes });
   };
 
   const handleCancel = () => {
     setEditedData(recordData);
     setEditedContent(recordData?.content || '');
+    setIcdCodes(recordData?.icdCodes || []);
     setIsEditMode(false);
+  };
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const handleDownload = () => {
+    const content = editedData.content || '';
+    const patientName = patient?.name || 'Patient';
+    const date = new Date().toLocaleDateString();
+    
+    // Create text content
+    let textContent = `Medical Note - ${patientName}\n`;
+    textContent += `Date: ${date}\n`;
+    textContent += `Doctor: ${doctor?.name || 'Unknown'}\n`;
+    textContent += `\n${'='.repeat(50)}\n\n`;
+    textContent += content;
+    
+    // Add ICD codes if present
+    if (icdCodes && icdCodes.length > 0) {
+      textContent += `\n\n${'='.repeat(50)}\n`;
+      textContent += `\nICD-10 Codes:\n`;
+      icdCodes.forEach(code => {
+        textContent += `- ${code.code}: ${code.description || code.shortDescription}\n`;
+      });
+    }
+    
+    // Create blob and download
+    const blob = new Blob([textContent], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `medical-note-${patientName.replace(/\s+/g, '-')}-${date}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
 
   const updateField = (section, field, value) => {
@@ -170,13 +215,29 @@ export default function EnhancedProviderNote({
           <div className="flex justify-between items-center gap-2 mb-6">
             <div className="flex gap-2">
               {!isEditMode ? (
-                <button
-                  onClick={handleEditToggle}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center gap-2"
-                >
-                  <Edit2 className="h-4 w-4" />
-                  Edit Note
-                </button>
+                <>
+                  <button
+                    onClick={handleEditToggle}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-lg font-medium hover:bg-blue-700 transition-colors flex items-center gap-2"
+                  >
+                    <Edit2 className="h-4 w-4" />
+                    Edit Note
+                  </button>
+                  <button
+                    onClick={handlePrint}
+                    className="px-4 py-2 bg-gray-600 text-white rounded-lg font-medium hover:bg-gray-700 transition-colors flex items-center gap-2"
+                  >
+                    <Printer className="h-4 w-4" />
+                    Print
+                  </button>
+                  <button
+                    onClick={handleDownload}
+                    className="px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition-colors flex items-center gap-2"
+                  >
+                    <Download className="h-4 w-4" />
+                    Download
+                  </button>
+                </>
               ) : (
                 <>
                   <button
@@ -216,6 +277,14 @@ export default function EnhancedProviderNote({
                     {editedData.content || 'No content available'}
                   </div>
                 )}
+                
+                {/* ICD-10 Code Selector */}
+                <ICDCodeSelector
+                  noteContent={editedContent}
+                  initialCodes={icdCodes}
+                  onCodesChange={setIcdCodes}
+                  templateSupportsICD10={template?.supportsICD10 || false}
+                />
               </div>
             )}
           </div>

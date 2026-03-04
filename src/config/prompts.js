@@ -11,6 +11,7 @@ export const NOTE_TEMPLATES = [
     title: 'SOAP Note',
     category: 'Medical',
     isDefault: true,
+    supportsICD10: true,
     prompt: `Subjective: 
 - [Reason for visit or chief complaint] (State the primary reason for the consultation, such as symptoms, requests, or concerns raised by the patient. Only include if explicitly mentioned in the transcript, contextual notes or clinical note; otherwise leave blank.)
 - [Symptom characteristics] (Include duration, timing, location, quality, severity, and context of the complaint. Only include if explicitly mentioned in the transcript, contextual notes or clinical note; otherwise leave blank.)
@@ -51,6 +52,7 @@ Plan:
     title: 'ADIME Note',
     category: 'Nutrition',
     isDefault: false,
+    supportsICD10: true,
     prompt: `Reason for Visit: [patient's reason for visit and/or chief concern] (Only include if explicitly mentioned in the transcript, contextual notes, or clinical note; otherwise omit completely. Include the patient’s stated concerns, presenting issue, or goal for seeking nutrition input. Write in full sentences.)
 
 Assessment:
@@ -163,6 +165,7 @@ Monitoring and Evaluation:
     title: 'Patient Explainer Letter',
     category: 'Letter',
     isDefault: false,
+    supportsICD10: false,
     prompt: `Dear [Patient's Name], (Only include if explicitly mentioned in transcript, contextual or clinical note, else omit section entirely.)
 
 "It was a pleasure to see you today and review your health concerns. I appreciate the time you took to share details about your health and personal life." [Insert small talk relevant to the visit] (Only include if explicitly mentioned in transcript, contextual or clinical note, else omit section entirely.) "I’ve summarised our discussion below to help you remember what we covered."
@@ -194,6 +197,7 @@ Next Steps:
     title: 'Ward Round',
     category: 'Medical',
     isDefault: false,
+    supportsICD10: true,
     prompt: `Ward Round / Clinical Handover Note
 
 Handover Details:
@@ -282,6 +286,7 @@ Action Summary:
     title: 'Dietetics Note',
     category: 'Nutrition',
     isDefault: false,
+    supportsICD10: true,
     prompt: `Ward Round / Clinical Handover Note
 
 Handover Details:
@@ -370,6 +375,7 @@ Action Summary:
     title: 'Eating Disorder Intake & Assessment',
     category: 'Nutrition',
     isDefault: false,
+    supportsICD10: true,
     prompt: `1. Weight History  
  - Dieting History: [Details about past diets or weight-loss efforts.] (Only include if explicitly mentioned in the transcript, contextual notes or clinical note; otherwise omit completely.)  
  - Weight Cycling: [Information on any fluctuations in weight over time.] (Only include if explicitly mentioned in the transcript, contextual notes or clinical note; otherwise omit completely.)  
@@ -450,6 +456,7 @@ Action Summary:
     title: 'SMART Goals',
     category: 'Other',
     isDefault: false,
+    supportsICD10: false,
     prompt: `SMART Goal 1    
 Patient problems/needs/relevant conditions:  
 - [Briefly state the relevant problem, need or condition for SMART goal 1] (Only include if explicitly mentioned in the transcript, contextual notes or clinical note; otherwise omit completely.)
@@ -486,6 +493,7 @@ Arrangements for treatment/services (when, who, contact details):
     title: 'Board Executive Meeting Minutes',
     category: 'Meeting',
     isDefault: false,
+    supportsICD10: false,
     prompt: `Meeting Details:
 [organisation name] (Only include if explicitly mentioned in transcript or context, else omit entirely.)
 [meeting type e.g. Board Meeting, Executive Meeting, Board Sub-Committee Meeting] (Only include if explicitly mentioned in transcript or context, else omit entirely.)
@@ -595,6 +603,7 @@ Next Meeting:
     title: 'Business Meeting',
     category: 'Meeting',
     isDefault: false,
+    supportsICD10: false,
     prompt: `Meeting Summary
 [comprehensive summary of the key topics discussed, decisions made, and outcomes from the meeting] (Only include if explicitly mentioned in transcript, contextual notes or clinical note, else omit completely. Write in paragraph format.)
 
@@ -622,6 +631,7 @@ Post-Meeting Reflections
     title: 'Clinical Governance Meeting Note',
     category: 'Meeting',
     isDefault: false,
+    supportsICD10: false,
     prompt: `Clinical Governance Meeting Minutes
 
 1. Meeting Details:
@@ -778,6 +788,7 @@ Special Agenda Items:
     title: 'Departmental Team Meeting Note',
     category: 'Meeting',
     isDefault: false,
+    supportsICD10: false,
     prompt: `Meeting Details:
 [department or clinical unit name] (Only include if explicitly mentioned in transcript or context, else omit section entirely.)
 Date: [date of meeting] (Only include if explicitly mentioned in transcript or context, else omit section entirely.)
@@ -858,6 +869,7 @@ Time: [time of next scheduled meeting] (Only include if explicitly mentioned in 
     title: 'Allied Health Team Meeting Note',
     category: 'Meeting',
     isDefault: false,
+    supportsICD10: false,
     prompt: `Allied Health Team Meeting
 
 Meeting Details:
@@ -931,6 +943,7 @@ Agenda Items to Carry Forward: [list any items deferred or flagged for follow-up
     title: 'Discharge Planning Meeting Note',
     category: 'Meeting',
     isDefault: false,
+    supportsICD10: false,
     prompt: `Discharge Planning Meeting
 
 Meeting Details:
@@ -1009,6 +1022,7 @@ Contingency Plan:
     title: 'Family Meeting Case Conference Note',
     category: 'Meeting',
     isDefault: false,
+    supportsICD10: false,
     prompt: `(Note: This document forms part of the patient's medical record and may be accessed by the patient or their authorised representative under applicable health records legislation. Ensure all entries are factual, objective, and clinically appropriate.)
 
 Meeting Details:
@@ -1067,6 +1081,7 @@ Action Items:
     title: 'Case Review Clinical Supervision Note',
     category: 'Medical',
     isDefault: false,
+    supportsICD10: false,
     prompt: `Case Review / Clinical Supervision Note
 
 (This document is a confidential professional development record. It should be stored securely and treated in accordance with organisational clinical governance policies.)
@@ -1137,6 +1152,7 @@ Next Session:
     title: 'Dietetic Consultation Note',
     category: 'Nutrition',
     isDefault: false,
+    supportsICD10: true,
     prompt: `Dietetic Consultation Note:
  
  Referral Reason:
@@ -1169,6 +1185,7 @@ Next Session:
     title: 'Dietetic Summary Letter',
     category: 'Letter',
     isDefault: false,
+    supportsICD10: false,
     prompt: `Re: [Patient name], [DOB]
  Seen on: [date of review]
  Dietitian: [name]
@@ -1198,6 +1215,7 @@ Next Session:
     title: 'Discharge Nutrition Summary',
     category: 'Nutrition',
     isDefault: false,
+    supportsICD10: true,
     prompt: `Discharge Nutrition Summary:
  
  Patient Details:
@@ -1227,6 +1245,7 @@ Next Session:
     title: 'Generic Referral Letter',
     category: 'Letter',
     isDefault: false,
+    supportsICD10: false,
     prompt: `[Today’s Date]
 
 Dear [Name and title of clinician the letter is addressed to], (Only include if explicitly mentioned in the transcript, contextual notes or clinical note; otherwise omit completely)
@@ -1256,6 +1275,7 @@ Yours sincerely,
     title: 'SOAP Note Including Issues',
     category: 'Medical',
     isDefault: false,
+    supportsICD10: true,
     prompt: `Subjective:
 [reasons for visit, including chief complaints such as requests, symptoms etc] (Include reasons for presentation such as requests, symptom complaints, or discussion points. Only include if explicitly mentioned in the transcript, contextual notes or clinical note; otherwise leave blank.)
 [duration, timing, location, quality, severity and context of presenting complaint] (Include specific details relating to when symptoms began, how long they last, where they occur, how they feel, how severe they are, and the context in which they appear. Only include if explicitly mentioned in the transcript, contextual notes or clinical note; otherwise leave blank.)

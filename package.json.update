@@ -1,0 +1,5 @@
+{
+  "note": "Add csv-parser to dependencies",
+  "command": "npm install csv-parser",
+  "dependency": "csv-parser"
+}

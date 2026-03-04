@@ -46,4 +46,20 @@ export class MedicalRecord {
       .findOne({ patientId: new ObjectId(patientId) })
       .sort({ createdAt: -1 });
   }
+
+  static async update(id, updateData) {
+    const collection = await this.getCollection();
+    
+    const result = await collection.updateOne(
+      { _id: new ObjectId(id) },
+      { 
+        $set: {
+          ...updateData,
+          updatedAt: new Date()
+        }
+      }
+    );
+
+    return result.modifiedCount > 0;
+  }
 }
