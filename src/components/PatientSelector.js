@@ -2,19 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { User, Plus, Search, Loader2, X } from 'lucide-react';
+import EnhancedPatientForm from './EnhancedPatientForm';
 
 export default function PatientSelector({ onSelectPatient, onBack }) {
   const [patients, setPatients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [formData, setFormData] = useState({
-    name: '',
-    age: '',
-    sex: '',
-    dob: '',
-    mrn: '',
-  });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
@@ -36,8 +30,7 @@ export default function PatientSelector({ onSelectPatient, onBack }) {
     }
   };
 
-  const handleAddPatient = async (e) => {
-    e.preventDefault();
+  const handleAddPatient = async (formData) => {
     setSubmitting(true);
     setError('');
 
@@ -53,12 +46,13 @@ export default function PatientSelector({ onSelectPatient, onBack }) {
       if (response.ok) {
         setPatients([data.patient, ...patients]);
         setShowAddForm(false);
-        setFormData({ name: '', age: '', sex: '', dob: '', mrn: '' });
       } else {
         setError(data.error || 'Failed to add patient');
+        alert(data.error || 'Failed to add patient');
       }
     } catch (err) {
       setError('Failed to add patient');
+      alert('Failed to add patient');
     } finally {
       setSubmitting(false);
     }
@@ -120,116 +114,13 @@ export default function PatientSelector({ onSelectPatient, onBack }) {
         </div>
       </div>
 
-        {/* Add Patient Form Modal */}
-        {showAddForm && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-6 z-50">
-            <div className="bg-white rounded-2xl p-8 max-w-md w-full border border-gray-200 shadow-2xl">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-gray-900">
-                  Add New Patient
-                </h2>
-                <button
-                  onClick={() => {
-                    setShowAddForm(false);
-                    setError('');
-                  }}
-                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                >
-                  <X className="h-5 w-5 text-gray-600" />
-                </button>
-              </div>
-
-              <form onSubmit={handleAddPatient} className="space-y-4">
-                {error && (
-                  <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600">
-                    {error}
-                  </div>
-                )}
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Full Name *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-                  />
-                </div>
-
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Age
-                    </label>
-                    <input
-                      type="number"
-                      value={formData.age}
-                      onChange={(e) => setFormData({ ...formData, age: e.target.value })}
-                      className="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-700 mb-2">
-                      Sex
-                    </label>
-                    <select
-                      value={formData.sex}
-                      onChange={(e) => setFormData({ ...formData, sex: e.target.value })}
-                      className="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-                    >
-                      <option value="">Select</option>
-                      <option value="Male">Male</option>
-                      <option value="Female">Female</option>
-                      <option value="Other">Other</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Date of Birth
-                  </label>
-                  <input
-                    type="date"
-                    value={formData.dob}
-                    onChange={(e) => setFormData({ ...formData, dob: e.target.value })}
-                    className="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    MRN / Patient ID
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.mrn}
-                    onChange={(e) => setFormData({ ...formData, mrn: e.target.value })}
-                    className="w-full px-4 py-2 bg-gray-50 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="w-full py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:opacity-50 flex items-center justify-center gap-2 shadow-md"
-                >
-                  {submitting ? (
-                    <>
-                      <Loader2 className="h-5 w-5 animate-spin" />
-                      Adding...
-                    </>
-                  ) : (
-                    'Add Patient'
-                  )}
-                </button>
-              </form>
-            </div>
-          </div>
-        )}
+      {/* Enhanced Patient Form Modal */}
+      {showAddForm && (
+        <EnhancedPatientForm
+          onClose={() => setShowAddForm(false)}
+          onSubmit={handleAddPatient}
+        />
+      )}
 
       {/* Patient List */}
       <div className="flex-1 overflow-y-auto px-6 py-4">

@@ -14,7 +14,7 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
     }
 
-    const { patientId, recordData } = await request.json();
+    const { patientId, recordData, sessionData } = await request.json();
 
     if (!patientId || !recordData) {
       return NextResponse.json(
@@ -27,6 +27,7 @@ export async function POST(request) {
       patientId,
       doctorId: payload.id,
       recordData,
+      sessionData: sessionData || {},
     });
 
     return NextResponse.json({ record }, { status: 201 });
@@ -53,6 +54,13 @@ export async function GET(request) {
 
     const { searchParams } = new URL(request.url);
     const patientId = searchParams.get('patientId');
+    const recordId = searchParams.get('recordId');
+
+    if (recordId) {
+      // Get specific record by ID
+      const record = await MedicalRecord.findById(recordId);
+      return NextResponse.json({ record });
+    }
 
     if (!patientId) {
       return NextResponse.json(
@@ -61,9 +69,10 @@ export async function GET(request) {
       );
     }
 
-    const record = await MedicalRecord.getLatestByPatient(patientId);
+    // Get all records for patient
+    const records = await MedicalRecord.findByPatient(patientId);
 
-    return NextResponse.json({ record });
+    return NextResponse.json({ records });
   } catch (error) {
     console.error('Get medical record error:', error);
     return NextResponse.json(

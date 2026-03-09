@@ -14,6 +14,11 @@ import {
 } from 'lucide-react';
 import PatientSelector from '@/components/PatientSelector';
 import EnhancedProviderNote from '@/components/EnhancedProviderNote';
+import TasksPanel from '@/components/TasksPanel';
+import SessionHistory from '@/components/SessionHistory';
+import ViewSessionModal from '@/components/ViewSessionModal';
+import DictateModal from '@/components/DictateModal';
+import AppointmentCalendar from '@/components/AppointmentCalendar';
 
 export default function Dashboard() {
   const { user, loading, logout } = useAuth();
@@ -49,6 +54,8 @@ export default function Dashboard() {
   const [showTasksPanel, setShowTasksPanel] = useState(false);
   const [templates, setTemplates] = useState([]);
   const [selectedTemplateName, setSelectedTemplateName] = useState('SOAP Note');
+  const [viewingSession, setViewingSession] = useState(null);
+  const [showDictateModal, setShowDictateModal] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -585,11 +592,12 @@ export default function Dashboard() {
                         <button
                           onClick={() => {
                             setShowTranscribeMenu(false);
-                            setSessionStatus('dictating');
+                            setShowDictateModal(true);
                           }}
-                          className="w-full px-4 py-2 text-left hover:bg-gray-50 text-sm text-gray-700"
+                          className="w-full px-4 py-2 text-left hover:bg-gray-50 text-sm text-gray-700 flex items-center gap-2"
                         >
-                          Dictate
+                          <Mic className="h-4 w-4 text-blue-600" />
+                          <span>Dictate</span>
                         </button>
                         <button
                           onClick={() => {
@@ -974,6 +982,75 @@ export default function Dashboard() {
                   </button>
                 ))}
               </div>
+            </div>
+          )}
+
+          {/* Tasks Tab */}
+          {activeTab === 'tasks' && (
+            <TasksPanel />
+          )}
+
+          {/* Template Library Tab */}
+          {activeTab === 'templateLibrary' && (
+            <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">Template Library</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {templates.map((template) => (
+                  <div
+                    key={template.id}
+                    className="border border-gray-200 rounded-lg p-6 hover:border-blue-300 hover:shadow-lg transition-all"
+                  >
+                    <div className="flex items-start gap-4">
+                      <div className="p-3 bg-blue-50 rounded-lg">
+                        <FileText className="h-6 w-6 text-blue-600" />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-gray-900 mb-1">
+                          {template.title}
+                        </h3>
+                        <p className="text-sm text-gray-600 mb-3">
+                          {template.description}
+                        </p>
+                        <div className="flex items-center gap-2">
+                          <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs font-medium">
+                            {template.category}
+                          </span>
+                          {template.supportsICD10 && (
+                            <span className="px-2 py-1 bg-green-100 text-green-700 rounded text-xs font-medium">
+                              ICD-10
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* View Sessions Tab */}
+          {activeTab === 'viewSessions' && selectedPatient && (
+            <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+              <h2 className="text-2xl font-bold text-gray-900 mb-6">Session History - {selectedPatient.name}</h2>
+              <SessionHistory 
+                sessions={patientRecords}
+                onViewSession={(session) => setViewingSession(session)}
+              />
+            </div>
+          )}
+
+          {activeTab === 'viewSessions' && !selectedPatient && (
+            <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm text-center py-12">
+              <Users2 className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">No Patient Selected</h3>
+              <p className="text-gray-600 mb-4">Please select a patient to view their session history</p>
+              <button
+                onClick={() => setShowPatientSelector(true)}
+                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                Select Patient
+              </button>
             </div>
           )}
 
@@ -1385,6 +1462,31 @@ export default function Dashboard() {
             />
           </div>
         </div>
+      )}
+
+      {/* View Session Modal */}
+      {viewingSession && (
+        <ViewSessionModal
+          session={viewingSession}
+          patient={selectedPatient}
+          onClose={() => setViewingSession(null)}
+        />
+      )}
+
+      {/* Dictate Modal */}
+      {showDictateModal && (
+        <DictateModal
+          isOpen={showDictateModal}
+          onClose={() => setShowDictateModal(false)}
+          onComplete={(data) => {
+            setTranscription(data.transcription);
+            setDialogue(data.dialogue);
+            setGeneratedNote(data.generatedNote);
+            setSessionTab('note');
+            setShowDictateModal(false);
+          }}
+          selectedTemplate={selectedTemplate}
+        />
       )}
     </div>
   );
