@@ -81,9 +81,36 @@ The "content" field should contain the entire note with all sections, formatting
     const result = JSON.parse(aiResponse);
     console.log('Parsed result:', result);
 
+    // Call disease prediction if template supports it
+    let diseasePrediction = null;
+    if (template.predictDisease && result.content) {
+      try {
+        console.log('Calling disease prediction API...');
+        const predictionRes = await fetch(`${process.env.COLAB_API_URL || process.env.NEXT_PUBLIC_COLAB_API_URL}/predict`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ symptoms: result.content }),
+        });
+
+        if (predictionRes.ok) {
+          const predictionData = await predictionRes.json();
+          diseasePrediction = predictionData.diagnosis;
+          console.log('Disease prediction received:', diseasePrediction);
+        } else {
+          console.warn('Disease prediction failed:', await predictionRes.text());
+        }
+      } catch (error) {
+        console.warn('Disease prediction error:', error.message);
+        // Continue without prediction if it fails
+      }
+    }
+
     return NextResponse.json({
       success: true,
-      data: result,
+      data: {
+        ...result,
+        diseasePrediction: diseasePrediction
+      },
       templateName: template.title,
     });
   } catch (error) {

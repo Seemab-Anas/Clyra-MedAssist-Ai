@@ -12,6 +12,7 @@ export const NOTE_TEMPLATES = [
     category: 'Medical',
     isDefault: true,
     supportsICD10: true,
+    predictDisease: true,
     prompt: `Subjective: 
 - [Reason for visit or chief complaint] (State the primary reason for the consultation, such as symptoms, requests, or concerns raised by the patient. Only include if explicitly mentioned in the transcript, contextual notes or clinical note; otherwise leave blank.)
 - [Symptom characteristics] (Include duration, timing, location, quality, severity, and context of the complaint. Only include if explicitly mentioned in the transcript, contextual notes or clinical note; otherwise leave blank.)
@@ -53,6 +54,7 @@ Plan:
     category: 'Nutrition',
     isDefault: false,
     supportsICD10: true,
+    predictDisease: true,
     prompt: `Reason for Visit: [patient's reason for visit and/or chief concern] (Only include if explicitly mentioned in the transcript, contextual notes, or clinical note; otherwise omit completely. Include the patient’s stated concerns, presenting issue, or goal for seeking nutrition input. Write in full sentences.)
 
 Assessment:
@@ -166,6 +168,7 @@ Monitoring and Evaluation:
     category: 'Letter',
     isDefault: false,
     supportsICD10: false,
+    predictDisease: false,
     prompt: `Dear [Patient's Name], (Only include if explicitly mentioned in transcript, contextual or clinical note, else omit section entirely.)
 
 "It was a pleasure to see you today and review your health concerns. I appreciate the time you took to share details about your health and personal life." [Insert small talk relevant to the visit] (Only include if explicitly mentioned in transcript, contextual or clinical note, else omit section entirely.) "I’ve summarised our discussion below to help you remember what we covered."
@@ -198,6 +201,7 @@ Next Steps:
     category: 'Medical',
     isDefault: false,
     supportsICD10: true,
+    predictDisease: true,
     prompt: `Ward Round / Clinical Handover Note
 
 Handover Details:
@@ -287,6 +291,7 @@ Action Summary:
     category: 'Nutrition',
     isDefault: false,
     supportsICD10: true,
+    predictDisease: false,
     prompt: `Ward Round / Clinical Handover Note
 
 Handover Details:
@@ -376,6 +381,7 @@ Action Summary:
     category: 'Nutrition',
     isDefault: false,
     supportsICD10: true,
+    predictDisease: false,
     prompt: `1. Weight History  
  - Dieting History: [Details about past diets or weight-loss efforts.] (Only include if explicitly mentioned in the transcript, contextual notes or clinical note; otherwise omit completely.)  
  - Weight Cycling: [Information on any fluctuations in weight over time.] (Only include if explicitly mentioned in the transcript, contextual notes or clinical note; otherwise omit completely.)  
